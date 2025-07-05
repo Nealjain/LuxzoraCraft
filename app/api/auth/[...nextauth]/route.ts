@@ -37,7 +37,7 @@ const handler = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        const supabase = createClient();
+        const supabase = await createClient();
 
         const { data, error } = await supabase.auth.signInWithPassword({
           email: credentials?.email || '',

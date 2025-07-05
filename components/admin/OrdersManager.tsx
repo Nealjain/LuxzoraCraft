@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
-  Search, 
-  Eye, 
-  Package, 
-  Truck, 
+  Search,
+  Eye,
+  Package,
+  Truck,
   CheckCircle,
   XCircle,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from 'lucide-react'
 
 type Order = {
