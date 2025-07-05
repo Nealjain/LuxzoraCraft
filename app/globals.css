@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 15, 15, 15;
+  --background-end-rgb: 15, 15, 15;
+  --accent-rgb: 200, 169, 126;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl font-semibold;
+  }
+  
+  p {
+    @apply text-base md:text-lg;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-6 py-3 rounded-md font-medium transition-all duration-300 transform hover:scale-105;
+  }
+  
+  .btn-primary {
+    @apply bg-accent text-primary hover:bg-accent-light active:bg-accent-dark;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-accent text-accent hover:bg-accent hover:text-primary;
+  }
+  
+  .card {
+    @apply bg-gray-dark/70 backdrop-blur-md rounded-lg overflow-hidden shadow-lg;
+  }
+  
+  .input {
+    @apply bg-black border-accent/30 rounded-md focus:ring-accent focus:border-accent text-white;
+  }
+  
+  .gold-gradient {
+    @apply bg-gradient-gold bg-clip-text text-transparent;
+  }
+  
+  .glass-panel {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-xl;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-dark;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-accent/50 rounded-full hover:bg-accent;
+}
+
+/* Swiper custom styles */
+.swiper-pagination-bullet {
+  @apply bg-white/50 !important;
+}
+
+.swiper-pagination-bullet-active {
+  @apply bg-accent !important;
+}
+
+/* Animation classes */
+.animate-fade-in {
+  /* Define your fade-in animation properties here, e.g., opacity, transform */
+}
+
+.animate-slide-up {
+  /* Define your slide-up animation properties here */
+}
+
+.animate-pulse-gold {
+  /* Define your pulse-gold animation properties here */
+}
+
+/* Gold text effect */
+.gold-text {
+  @apply text-accent;
+  text-shadow: 0 0 10px rgba(200, 169, 126, 0.3);
+}
+
+/* Loading animation */
+.loading-logo {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}

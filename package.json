@@ -1,0 +1,46 @@
+{
+  "name": "luxzoracraft",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auth/supabase-adapter": "^1.10.0",
+    "@next-auth/supabase-adapter": "^0.2.1",
+    "@splinetool/react-spline": "^2.2.6",
+    "@supabase/auth-helpers-nextjs": "^0.7.4",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.33.1",
+    "bcryptjs": "^3.0.2",
+    "framer-motion": "^10.16.4",
+    "gsap": "^3.12.2",
+    "lucide-react": "^0.525.0",
+    "next": "^15.4.0-canary.114",
+    "next-auth": "^4.24.11",
+    "razorpay": "^2.9.2",
+    "react": "^19.2.0-canary-5d87cd22-20250704",
+    "react-dom": "^19.2.0-canary-5d87cd22-20250704",
+    "react-hook-form": "^7.46.1",
+    "swiper": "^10.2.0",
+    "zod": "^3.22.2",
+    "zustand": "^4.4.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.6",
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/node": "20.6.0",
+    "@types/react": "18.2.21",
+    "@types/react-dom": "18.2.7",
+    "autoprefixer": "10.4.15",
+    "eslint": "8.49.0",
+    "eslint-config-next": "13.4.19",
+    "postcss": "8.4.29",
+    "tailwindcss": "3.3.3",
+    "typescript": "5.2.2"
+  }
+}
