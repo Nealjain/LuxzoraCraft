@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import Image from 'next/image'
 import { motion, useInView } from 'framer-motion'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination } from 'swiper/modules'
@@ -49,24 +50,25 @@ export default function Testimonials() {
   
   return (
     <section ref={sectionRef} className="py-16">
-      <div className="text-center mb-12">
-        <motion.h2 
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl md:text-4xl font-serif gold-text mb-4"
-        >
-          Customer Testimonials
-        </motion.h2>
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-gray-300 max-w-2xl mx-auto"
-        >
-          Hear what our customers have to say about their experience with LuxZoraCraft jewelry.
-        </motion.p>
-      </div>
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl md:text-4xl font-serif gold-text mb-4"
+          >
+            Customer Testimonials
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-gray-300 max-w-2xl mx-auto"
+          >
+            Hear what our customers have to say about their experience with LuxZoraCraft jewelry.
+          </motion.p>
+        </div>
       
       <motion.div
         initial={{ opacity: 0 }}
@@ -89,11 +91,13 @@ export default function Testimonials() {
             <SwiperSlide key={testimonial.id}>
               <div className="card p-6 h-full flex flex-col">
                 <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
-                    <img 
+                  <div className="w-12 h-12 rounded-full overflow-hidden mr-4 relative">
+                    <Image 
                       src={testimonial.image} 
                       alt={testimonial.name} 
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="48px"
                     />
                   </div>
                   <div>
@@ -121,6 +125,7 @@ export default function Testimonials() {
           ))}
         </Swiper>
       </motion.div>
+      </div>
     </section>
   )
 }

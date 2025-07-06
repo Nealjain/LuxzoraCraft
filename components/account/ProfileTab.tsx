@@ -31,9 +31,21 @@ export default function ProfileTab() {
     setSuccessMessage('')
     
     try {
-      // In a real app, this would update the user's profile
-      // For now, we'll simulate an API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Update user profile
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          // Add other fields as needed
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update profile')
+      }
       
       setSuccessMessage('Profile updated successfully')
       reset({
@@ -44,6 +56,7 @@ export default function ProfileTab() {
       })
     } catch (error) {
       console.error('Error updating profile:', error)
+      setSuccessMessage('Failed to update profile. Please try again.')
     } finally {
       setIsSubmitting(false)
     }

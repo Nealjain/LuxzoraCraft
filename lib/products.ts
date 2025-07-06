@@ -1,24 +1,64 @@
 import { Product } from '@/types/product';
+import { createClient } from '@/utils/supabase/server';
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  // This is a placeholder function. You will need to implement the actual logic
-  // to fetch product data based on the slug from your database or API.
-  console.warn(`getProductBySlug called with slug: ${slug}. This is a placeholder function.`);
+  const supabase = await createClient();
 
-  // Return a mock product for now to allow the build to proceed
-  if (slug === 'mock-product') {
-    return {
-      id: '1',
-      name: 'Mock Product',
-      slug: 'mock-product',
-      description: 'This is a mock product description.',
-      price: 99.99,
-      images: ['/images/products/mock-product.jpg'],
-      category: 'Rings',
-      stock: 10,
-      featured: true,
-      spline_model: 'https://prod.spline.design/your-spline-model-id/scene.splinecode',
-    };
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error) {
+    console.error('Error fetching product by slug:', error);
+    return null;
   }
-  return null;
+
+  if (!data) {
+    return null;
+  }
+
+  // Assuming your 'products' table has an 'images' column that is an array of strings
+  // and 'spline_model' column for the 3D model URL.
+  // You might need to adjust the column names based on your actual Supabase schema.
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+    description: data.description,
+    price: data.price,
+    images: data.images || [], // Ensure images is an array, default to empty if null/undefined
+    category: data.category,
+    stock: data.stock,
+    featured: data.featured,
+    spline_model: data.spline_model || null,
+  };
+}
+
+export async function getFeaturedProducts(): Promise<Product[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('featured', true);
+
+  if (error) {
+    console.error('Error fetching featured products:', error);
+    return [];
+  }
+
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    slug: item.slug,
+    description: item.description,
+    price: item.price,
+    images: item.images || [],
+    category: item.category,
+    stock: item.stock,
+    featured: item.featured,
+    spline_model: item.spline_model || null,
+  }));
 }

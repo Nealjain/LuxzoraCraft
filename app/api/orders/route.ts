@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/server'
 import Razorpay from 'razorpay'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -21,6 +16,7 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const offset = (page - 1) * limit
     
+    const supabase = await createClient()
     let query = supabase
       .from('orders')
       .select('*', { count: 'exact' })
@@ -61,10 +57,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { userId, items, shippingAddress, amount } = await request.json()
+    const { userId, items, shippingAddressId, amount } = await request.json()
     
     // Validate input
-    if (!userId || !items || !shippingAddress || !amount) {
+    if (!userId || !items || !shippingAddressId || !amount) {
       return NextResponse.json(
         { message: 'Missing required fields' },
         { status: 400 }
@@ -78,32 +74,56 @@ export async function POST(request: Request) {
       receipt: `order_${Date.now()}`,
     })
     
+    const supabase = await createClient()
+    
     // Create order in Supabase
-    const { data, error } = await supabase
+    const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert([
         {
           user_id: userId,
-          items,
-          shipping_address: shippingAddress,
+          shipping_address_id: shippingAddressId,
           amount,
-          razorpay_order_id: razorpayOrder.id,
           status: 'pending',
         },
       ])
       .select()
     
-    if (error) {
-      console.error('Error creating order:', error)
+    if (orderError) {
+      console.error('Error creating order:', orderError)
       return NextResponse.json(
         { message: 'Failed to create order' },
         { status: 500 }
       )
     }
     
+    const orderId = orderData[0].id
+    
+    // Create order items
+    const orderItems = items.map((item: any) => ({
+      order_id: orderId,
+      product_id: item.productId,
+      quantity: item.quantity,
+      price: item.price,
+    }))
+    
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(orderItems)
+    
+    if (itemsError) {
+      console.error('Error creating order items:', itemsError)
+      // Clean up order if items creation fails
+      await supabase.from('orders').delete().eq('id', orderId)
+      return NextResponse.json(
+        { message: 'Failed to create order items' },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json({
       message: 'Order created successfully',
-      order: data[0],
+      order: orderData[0],
       razorpayOrder,
     }, { status: 201 })
   } catch (error) {

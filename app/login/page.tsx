@@ -6,6 +6,7 @@ import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import AddressCollection from '@/components/auth/AddressCollection'
 import { motion } from 'framer-motion'
 
 export default function LoginPage() {
@@ -18,37 +19,58 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [isFirstTimeGoogleUser, setIsFirstTimeGoogleUser] = useState(false)
   
   useEffect(() => {
-    if (status === 'authenticated') {
-      router.push(redirect)
+    if (status === 'authenticated' && session?.user) {
+      // Check if this is a first-time Google user needing address collection
+      const shouldCollectAddress = 
+        !localStorage.getItem('address_collection_skipped') &&
+        !localStorage.getItem('address_collected') &&
+        isFirstTimeGoogleUser
+      
+      if (shouldCollectAddress) {
+        setShowAddressModal(true)
+      } else {
+        router.push(redirect)
+      }
     }
-  }, [status, router, redirect])
+  }, [status, session, router, redirect, isFirstTimeGoogleUser])
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
     
-    try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email,
-        password,
-      })
-      
-      if (result?.error) {
-        setError('Invalid email or password')
-      }
-    } catch (err) {
-      setError('An error occurred. Please try again.')
-    } finally {
-      setIsLoading(false)
+    const result = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
+    })
+    
+    if (result?.error) {
+      setError(result.error)
+    } else if (result?.ok) {
+      router.push(redirect)
     }
+    setIsLoading(false)
   }
   
   const handleGoogleSignIn = () => {
+    setIsFirstTimeGoogleUser(true)
     signIn('google', { callbackUrl: redirect })
+  }
+  
+  const handleAddressSubmit = (address: any) => {
+    localStorage.setItem('address_collected', 'true')
+    setShowAddressModal(false)
+    router.push(redirect)
+  }
+  
+  const handleAddressModalClose = () => {
+    setShowAddressModal(false)
+    router.push(redirect)
   }
   
   if (status === 'loading') {
@@ -73,7 +95,7 @@ export default function LoginPage() {
           className="w-full max-w-md"
         >
           <div className="card p-8">
-            <h1 className="text-3xl font-serif mb-6 text-center gold-text">Sign In</h1>
+            <h1 className="text-3xl font-serif mb-6 text-center gold-text">Login</h1>
             
             {error && (
               <div className="bg-red-500/20 border border-red-500 text-red-100 p-3 rounded mb-4">
@@ -106,46 +128,36 @@ export default function LoginPage() {
                 />
               </div>
               
-              <div>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                </button>
-              </div>
+              <button type="submit" className="btn btn-primary w-full" disabled={isLoading}>
+                {isLoading ? 'Logging in...' : 'Login'}
+              </button>
             </form>
             
             <div className="mt-4 text-center">
-              <p className="text-sm text-gray-300">Or sign in with</p>
-              <button 
+              <button
                 onClick={handleGoogleSignIn}
-                className="mt-2 btn btn-outline w-full flex items-center justify-center gap-2"
+                className="btn btn-outline w-full flex items-center justify-center"
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
-                  />
-                </svg>
-                Google
+                <img src="/images/google-icon.svg" alt="Google" className="w-5 h-5 mr-2" />
+                Sign in with Google
               </button>
             </div>
             
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-300">
-                Don&apos;t have an account?{' '}
-                <Link href="/register" className="text-accent hover:underline">
-                  Sign up
-                </Link>
-              </p>
+              <p className="text-sm text-gray-400">Don't have an account? <Link href="/register" className="text-accent hover:underline">Register</Link></p>
             </div>
           </div>
         </motion.div>
       </div>
       
       <Footer />
+      
+      {/* Address Collection Modal */}
+      <AddressCollection
+        isOpen={showAddressModal}
+        onClose={handleAddressModalClose}
+        onSubmit={handleAddressSubmit}
+      />
     </main>
   )
 }

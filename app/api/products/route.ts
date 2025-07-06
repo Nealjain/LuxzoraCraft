@@ -1,10 +1,6 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export async function GET(request: Request) {
   try {
@@ -15,13 +11,21 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const offset = (page - 1) * limit
     
+    const supabase = await createClient();
     let query = supabase
       .from('products')
-      .select('*', { count: 'exact' })
+      .select(`
+        *,
+        categories (
+          id,
+          name,
+          slug
+        )
+      `, { count: 'exact' })
     
     // Apply filters if provided
     if (category) {
-      query = query.eq('category', category)
+      query = query.eq('categories.slug', category)
     }
     
     if (search) {
@@ -59,10 +63,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { name, slug, description, price, images, category, stock, spline_model, featured } = await request.json()
-    
-    // Validate input
-    if (!name || !slug || !price || !images || !category) {
+    const { name, description, price, images, category_id, stock, spline_model, featured, coupon } = await request.json();
+
+    if (!name || !price || !images || !category_id) {
       return NextResponse.json(
         { message: 'Missing required fields' },
         { status: 400 }
@@ -70,19 +73,21 @@ export async function POST(request: Request) {
     }
     
     // Create product in Supabase
+    const supabase = await createClient();
     const { data, error } = await supabase
       .from('products')
       .insert([
         {
           name,
-          slug,
+          slug: name.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, ''), // Simple slug generation
           description,
           price,
           images,
-          category,
-          stock,
+          category_id,
+          stock: stock || 0,
           spline_model,
           featured: featured || false,
+          coupon,
         },
       ])
       .select()

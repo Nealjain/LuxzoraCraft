@@ -25,10 +25,10 @@ type Order = {
   created_at: string
   tracking_number?: string
   shipping_address: {
-    address: string
+    street_address: string
     city: string
     state: string
-    postalCode: string
+    postal_code: string
     country: string
   }
 }
@@ -46,185 +46,28 @@ export default function OrdersManager() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        // In a real app, this would be an API call
-        // For now, we'll use mock data
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        const mockOrders: Order[] = [
-          {
-            id: 'ORD12345',
-            customer: {
-              name: 'Priya Sharma',
-              email: 'priya.sharma@example.com'
-            },
-            status: 'delivered',
-            amount: 2198,
-            items: [
-              {
-                id: '1',
-                name: 'Gold-Plated Pendant Necklace',
-                price: 1299,
-                quantity: 1,
-                images: ['/images/products/necklace-1.jpg'],
-              },
-              {
-                id: '2',
-                name: 'Twisted Band Ring',
-                price: 899,
-                quantity: 1,
-                images: ['/images/products/ring-1.jpg'],
-              },
-            ],
-            created_at: '2023-08-15T10:30:00Z',
-            tracking_number: 'TRK987654321',
-            shipping_address: {
-              address: '123 Main Street, Apartment 4B',
-              city: 'Mumbai',
-              state: 'Maharashtra',
-              postalCode: '400001',
-              country: 'India'
-            }
-          },
-          {
-            id: 'ORD12346',
-            customer: {
-              name: 'Rahul Patel',
-              email: 'rahul.patel@example.com'
-            },
-            status: 'shipped',
-            amount: 1499,
-            items: [
-              {
-                id: '3',
-                name: 'Crystal Drop Earrings',
-                price: 1499,
-                quantity: 1,
-                images: ['/images/products/earrings-1.jpg'],
-              },
-            ],
-            created_at: '2023-09-05T14:45:00Z',
-            tracking_number: 'TRK123456789',
-            shipping_address: {
-              address: '456 Business Park, Building C',
-              city: 'Mumbai',
-              state: 'Maharashtra',
-              postalCode: '400051',
-              country: 'India'
-            }
-          },
-          {
-            id: 'ORD12347',
-            customer: {
-              name: 'Ananya Gupta',
-              email: 'ananya.gupta@example.com'
-            },
-            status: 'pending',
-            amount: 3299,
-            items: [
-              {
-                id: '5',
-                name: 'Statement Collar Necklace',
-                price: 1899,
-                quantity: 1,
-                images: ['/images/products/necklace-2.jpg'],
-              },
-              {
-                id: '7',
-                name: 'Geometric Hoop Earrings',
-                price: 1199,
-                quantity: 1,
-                images: ['/images/products/earrings-2.jpg'],
-              },
-              {
-                id: '8',
-                name: 'Beaded Charm Bracelet',
-                price: 1099,
-                quantity: 1,
-                images: ['/images/products/bracelet-2.jpg'],
-              },
-            ],
-            created_at: '2023-09-10T09:15:00Z',
-            shipping_address: {
-              address: '789 Residential Colony, Flat 12',
-              city: 'Bangalore',
-              state: 'Karnataka',
-              postalCode: '560001',
-              country: 'India'
-            }
-          },
-          {
-            id: 'ORD12348',
-            customer: {
-              name: 'Vikram Singh',
-              email: 'vikram.singh@example.com'
-            },
-            status: 'pending',
-            amount: 2499,
-            items: [
-              {
-                id: '4',
-                name: 'Layered Chain Bracelet',
-                price: 999,
-                quantity: 1,
-                images: ['/images/products/bracelet-1.jpg'],
-              },
-              {
-                id: '6',
-                name: 'Minimalist Stacking Rings Set',
-                price: 1299,
-                quantity: 1,
-                images: ['/images/products/ring-2.jpg'],
-              },
-            ],
-            created_at: '2023-09-12T16:20:00Z',
-            shipping_address: {
-              address: '234 Park Avenue, House 7',
-              city: 'Delhi',
-              state: 'Delhi',
-              postalCode: '110001',
-              country: 'India'
-            }
-          },
-          {
-            id: 'ORD12349',
-            customer: {
-              name: 'Aditya Sharma',
-              email: 'aditya.sharma@example.com'
-            },
-            status: 'cancelled',
-            amount: 1899,
-            items: [
-              {
-                id: '5',
-                name: 'Statement Collar Necklace',
-                price: 1899,
-                quantity: 1,
-                images: ['/images/products/necklace-2.jpg'],
-              },
-            ],
-            created_at: '2023-09-01T11:10:00Z',
-            shipping_address: {
-              address: '567 Commercial Street',
-              city: 'Chennai',
-              state: 'Tamil Nadu',
-              postalCode: '600001',
-              country: 'India'
-            }
-          },
-        ]
-        
-        setOrders(mockOrders)
-        setIsLoading(false)
-      } catch (error) {
-        console.error('Error fetching orders:', error)
-        setIsLoading(false)
-      }
-    }
-    
     fetchOrders()
   }, [])
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('/api/admin/orders')
+      const data = await response.json()
+
+      if (response.ok) {
+        setOrders(data.orders || [])
+      } else {
+        console.error('Failed to fetch orders:', data.message)
+        // Use mock data if API fails
+        setOrders([])
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error)
+      setOrders([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
   
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
@@ -239,7 +82,7 @@ export default function OrdersManager() {
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-IN', {
+    return date.toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -292,30 +135,50 @@ export default function OrdersManager() {
     setIsUpdateStatusModalOpen(true)
   }
   
-  const handleUpdateStatus = () => {
+  const handleUpdateStatus = async () => {
     if (!selectedOrder) return
     
     setIsSubmitting(true)
     
-    // Simulate API call
-    setTimeout(() => {
-      const updatedOrders = orders.map(order => 
-        order.id === selectedOrder.id 
-          ? { 
-              ...order, 
-              status: newStatus as any,
-              tracking_number: newStatus === 'shipped' || newStatus === 'delivered' 
-                ? trackingNumber 
-                : order.tracking_number
-            } 
-          : order
-      )
-      
-      setOrders(updatedOrders)
-      setIsUpdateStatusModalOpen(false)
-      setSelectedOrder(null)
+    try {
+      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          tracking_number: trackingNumber,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        const updatedOrders = orders.map((order) =>
+          order.id === selectedOrder.id
+            ? {
+                ...order,
+                status: newStatus as any,
+                tracking_number:
+                  newStatus === 'shipped' || newStatus === 'delivered'
+                    ? trackingNumber
+                    : order.tracking_number,
+              }
+            : order
+        )
+
+        setOrders(updatedOrders)
+        setIsUpdateStatusModalOpen(false)
+        setSelectedOrder(null)
+      } else {
+        console.error('Failed to update order status:', data.message)
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error)
+    } finally {
       setIsSubmitting(false)
-    }, 1000)
+    }
   }
   
   if (isLoading) {
@@ -330,7 +193,7 @@ export default function OrdersManager() {
   
   return (
     <div>
-      <h1 className="text-3xl font-serif gold-text mb-8">Orders</h1>
+      <h1 className="text-3xl font-serif gold-text mb-8">Orders Management</h1>
       
       <div className="card p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-4">
@@ -405,7 +268,7 @@ export default function OrdersManager() {
                   </div>
                 </td>
                 <td className="py-4 px-4 text-right">
-                  ₹{order.amount.toLocaleString()}
+                  ${order.amount.toLocaleString()}
                 </td>
                 <td className="py-4 px-4 text-right">
                   <div className="flex items-center justify-end space-x-2">
@@ -473,7 +336,7 @@ export default function OrdersManager() {
                   </span>
                 </p>
                 <p><span className="text-gray-400">Date:</span> {formatDate(selectedOrder.created_at)}</p>
-                <p><span className="text-gray-400">Total Amount:</span> ₹{selectedOrder.amount.toLocaleString()}</p>
+                <p><span className="text-gray-400">Total Amount:</span> ${selectedOrder.amount.toLocaleString()}</p>
                 {selectedOrder.tracking_number && (
                   <p><span className="text-gray-400">Tracking Number:</span> {selectedOrder.tracking_number}</p>
                 )}
@@ -482,49 +345,9 @@ export default function OrdersManager() {
             
             <div className="card p-4 mb-6">
               <h3 className="text-lg font-medium text-white mb-3">Shipping Address</h3>
-              <p>{selectedOrder.shipping_address.address}</p>
-              <p>{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.postalCode}</p>
+              <p>{selectedOrder.shipping_address.street_address}</p>
+              <p>{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.postal_code}</p>
               <p>{selectedOrder.shipping_address.country}</p>
-            </div>
-            
-            <div className="card p-4">
-              <h3 className="text-lg font-medium text-white mb-3">Order Items</h3>
-              <div className="space-y-4">
-                {selectedOrder.items.map((item) => (
-                  <div key={item.id} className="flex items-center border-b border-white/10 pb-4">
-                    <div className="w-16 h-16 rounded-md overflow-hidden mr-4">
-                      <img 
-                        src={item.images[0]} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-white">{item.name}</p>
-                      <p className="text-sm text-gray-400">Quantity: {item.quantity}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-accent">₹{item.price.toLocaleString()}</p>
-                      <p className="text-sm text-gray-400">₹{(item.price * item.quantity).toLocaleString()}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-white/10">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Subtotal:</span>
-                  <span className="text-white">₹{selectedOrder.amount.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-gray-400">Shipping:</span>
-                  <span className="text-white">₹99</span>
-                </div>
-                <div className="flex justify-between mt-2 pt-2 border-t border-white/10">
-                  <span className="font-medium text-white">Total:</span>
-                  <span className="font-medium text-accent">₹{(selectedOrder.amount + 99).toLocaleString()}</span>
-                </div>
-              </div>
             </div>
             
             <div className="flex justify-end mt-6">

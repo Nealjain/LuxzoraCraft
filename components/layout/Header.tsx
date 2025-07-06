@@ -222,7 +222,7 @@ export default function Header() {
                   </Link>
                 </div>
                 
-                {session?.user.isAdmin && (
+                {session?.user && 'isAdmin' in session.user && session.user.isAdmin && (
                   <Link 
                     href="/admin" 
                     className="text-xl font-serif text-accent"

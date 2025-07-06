@@ -31,6 +31,7 @@ CREATE TABLE products (
   stock INTEGER NOT NULL DEFAULT 0,
   spline_model TEXT,
   featured BOOLEAN DEFAULT FALSE,
+  coupon VARCHAR(255),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -73,6 +74,16 @@ CREATE TABLE order_items (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create reviews table
+CREATE TABLE reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create wishlist table
 CREATE TABLE wishlist (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -92,7 +103,11 @@ ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE addresses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlist ENABLE ROW LEVEL SECURITY;
+
+-- Example RLS policy for reviews table (allow all users to view reviews)
+CREATE POLICY "Reviews are viewable by all" ON reviews FOR SELECT USING (TRUE);
 
 -- Example RLS policy for users table (allow users to view their own data)
 -- CREATE POLICY "Users can view their own data" ON users FOR SELECT USING (auth.uid() = id);

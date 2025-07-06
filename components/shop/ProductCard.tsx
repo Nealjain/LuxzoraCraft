@@ -7,6 +7,8 @@ import { Eye, ShoppingBag } from 'lucide-react'
 import { useCart } from '@/lib/cart'
 import { Product } from '@/types/product'
 import { formatPrice } from '@/lib/utils'
+import OptimizedImage from '@/components/ui/OptimizedImage'
+import { useSquareFormatMonitoring } from '@/lib/hooks/useImagePerformanceMonitoring'
 
 interface ProductCardProps {
   product: Product
@@ -15,6 +17,9 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const { addItem } = useCart()
+  
+  // Monitor product images for square format compliance
+  useSquareFormatMonitoring(product.images)
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -35,9 +40,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-            style={{ backgroundImage: `url(${product.images[0]})` }}
+          <OptimizedImage
+            src={product.images[0]}
+            alt={product.name}
+            className="absolute inset-0 object-cover transition-transform duration-700 group-hover:scale-110"
+            fill
+            lazy
+            skeleton
+            placeholder="empty"
+            enablePerformanceMonitoring={true}
+            autoWebP={true}
+            squareFormat={true}
           />
           
           {/* Overlay */}

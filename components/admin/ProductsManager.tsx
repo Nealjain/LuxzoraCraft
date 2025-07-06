@@ -51,102 +51,13 @@ export default function ProductsManager() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // In a real app, this would be an API call
-        // For now, we'll use mock data
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const response = await fetch('/api/products')
+        if (!response.ok) {
+          throw new Error('Failed to fetch products')
+        }
         
-        const mockProducts: Product[] = [
-          {
-            id: '1',
-            name: 'Gold-Plated Pendant Necklace',
-            slug: 'gold-plated-pendant-necklace',
-            description: 'Elegant pendant necklace with a delicate chain, perfect for any occasion.',
-            price: 1299,
-            images: ['/images/products/necklace-1.jpg'],
-            category: 'necklaces',
-            stock: 15,
-            featured: true,
-          },
-          {
-            id: '2',
-            name: 'Twisted Band Ring',
-            slug: 'twisted-band-ring',
-            description: 'A beautiful twisted band ring that adds a touch of sophistication to your look.',
-            price: 899,
-            images: ['/images/products/ring-1.jpg'],
-            category: 'rings',
-            stock: 20,
-            featured: true,
-          },
-          {
-            id: '3',
-            name: 'Crystal Drop Earrings',
-            slug: 'crystal-drop-earrings',
-            description: 'Stunning drop earrings featuring sparkling crystals that catch the light beautifully.',
-            price: 1499,
-            images: ['/images/products/earrings-1.jpg'],
-            category: 'earrings',
-            stock: 2,
-            featured: true,
-          },
-          {
-            id: '4',
-            name: 'Layered Chain Bracelet',
-            slug: 'layered-chain-bracelet',
-            description: 'A stylish layered chain bracelet that adds elegance to any outfit.',
-            price: 999,
-            images: ['/images/products/bracelet-1.jpg'],
-            category: 'bracelets',
-            stock: 18,
-            featured: true,
-          },
-          {
-            id: '5',
-            name: 'Statement Collar Necklace',
-            slug: 'statement-collar-necklace',
-            description: 'A bold and elegant collar necklace that makes a statement with any outfit.',
-            price: 1899,
-            images: ['/images/products/necklace-2.jpg'],
-            category: 'necklaces',
-            stock: 5,
-            featured: false,
-          },
-          {
-            id: '6',
-            name: 'Minimalist Stacking Rings Set',
-            slug: 'minimalist-stacking-rings-set',
-            description: 'Set of three minimalist rings that can be worn together or separately.',
-            price: 1299,
-            images: ['/images/products/ring-2.jpg'],
-            category: 'rings',
-            stock: 25,
-            featured: false,
-          },
-          {
-            id: '7',
-            name: 'Geometric Hoop Earrings',
-            slug: 'geometric-hoop-earrings',
-            description: 'Modern geometric hoop earrings with a unique design.',
-            price: 1199,
-            images: ['/images/products/earrings-2.jpg'],
-            category: 'earrings',
-            stock: 15,
-            featured: false,
-          },
-          {
-            id: '8',
-            name: 'Beaded Charm Bracelet',
-            slug: 'beaded-charm-bracelet',
-            description: 'Elegant beaded bracelet with delicate charms.',
-            price: 1099,
-            images: ['/images/products/bracelet-2.jpg'],
-            category: 'bracelets',
-            stock: 4,
-            featured: false,
-          },
-        ]
-        
-        setProducts(mockProducts)
+        const data = await response.json()
+        setProducts(data.products)
         setIsLoading(false)
       } catch (error) {
         console.error('Error fetching products:', error)
@@ -166,40 +77,63 @@ export default function ProductsManager() {
     return matchesSearch && matchesCategory
   })
   
-  const handleAddProduct = (data: ProductFormData) => {
+  const handleAddProduct = async (data: ProductFormData) => {
     setIsSubmitting(true)
     
-    // Simulate API call
-    setTimeout(() => {
-      const newProduct: Product = {
-        id: `new-${Date.now()}`,
-        ...data,
-        images: uploadedImages.length > 0 ? uploadedImages : ['/images/products/placeholder.jpg'],
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          images: uploadedImages.length > 0 ? uploadedImages : ['/images/products/placeholder.jpg'],
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to add product')
       }
       
+      const newProduct = await response.json()
       setProducts([newProduct, ...products])
       setIsAddModalOpen(false)
       setUploadedImages([])
       reset()
+    } catch (error) {
+      console.error('Error adding product:', error)
+      alert('Failed to add product. Please try again.')
+    } finally {
       setIsSubmitting(false)
-    }, 1000)
+    }
   }
   
-  const handleEditProduct = (data: ProductFormData) => {
+  const handleEditProduct = async (data: ProductFormData) => {
     if (!selectedProduct) return
     
     setIsSubmitting(true)
     
-    // Simulate API call
-    setTimeout(() => {
-      const updatedProducts = products.map(product => 
-        product.id === selectedProduct.id 
-          ? { 
-              ...product, 
-              ...data,
-              images: uploadedImages.length > 0 ? uploadedImages : product.images 
-            } 
-          : product
+    try {
+      const response = await fetch(`/api/products/${selectedProduct.slug}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          images: uploadedImages.length > 0 ? uploadedImages : selectedProduct.images,
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update product')
+      }
+      
+      const updatedProduct = await response.json()
+      
+      const updatedProducts = products.map(product =>
+        product.id === selectedProduct.id ? updatedProduct : product
       )
       
       setProducts(updatedProducts)
@@ -207,24 +141,40 @@ export default function ProductsManager() {
       setSelectedProduct(null)
       setUploadedImages([])
       reset()
+    } catch (error) {
+      console.error('Error updating product:', error)
+      alert('Failed to update product. Please try again.')
+    } finally {
       setIsSubmitting(false)
-    }, 1000)
+    }
   }
   
-  const handleDeleteProduct = () => {
+  const handleDeleteProduct = async () => {
     if (!selectedProduct) return
     
     setIsSubmitting(true)
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch(`/api/products/${selectedProduct.slug}`, {
+        method: 'DELETE',
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete product')
+      }
+      
       const updatedProducts = products.filter(product => product.id !== selectedProduct.id)
       
       setProducts(updatedProducts)
       setIsDeleteModalOpen(false)
       setSelectedProduct(null)
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
       setIsSubmitting(false)
-    }, 1000)
+    }
   }
   
   const openEditModal = (product: Product) => {

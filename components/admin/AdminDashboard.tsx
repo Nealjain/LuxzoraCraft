@@ -27,18 +27,21 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // In a real app, this would be an API call
-        // For now, we'll use mock data
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const response = await fetch('/api/admin/stats')
+        const data = await response.json()
         
-        setStats({
-          totalSales: 125750,
-          totalOrders: 48,
-          totalCustomers: 32,
-          totalProducts: 24,
-          lowStockProducts: 3,
-          pendingOrders: 5
-        })
+        if (response.ok) {
+          setStats({
+            totalSales: data.stats.totalRevenue || 0,
+            totalOrders: data.stats.totalOrders || 0,
+            totalCustomers: data.stats.totalUsers || 0,
+            totalProducts: data.stats.totalProducts || 0,
+            lowStockProducts: data.stats.lowStockProducts?.length || 0,
+            pendingOrders: data.stats.orderStatusDistribution?.pending || 0
+          })
+        } else {
+          console.error('Failed to fetch dashboard data:', data.message)
+        }
         
         setIsLoading(false)
       } catch (error) {

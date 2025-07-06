@@ -39,8 +39,9 @@ export default function Newsletter() {
   
   return (
     <section ref={sectionRef} className="py-16">
-      <div className="glass-panel p-8 md:p-12">
-        <div className="max-w-3xl mx-auto text-center">
+      <div className="container mx-auto px-4">
+        <div className="glass-panel p-8 md:p-12">
+          <div className="max-w-3xl mx-auto text-center">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -96,6 +97,7 @@ export default function Newsletter() {
               </button>
             </motion.form>
           )}
+          </div>
         </div>
       </div>
     </section>
