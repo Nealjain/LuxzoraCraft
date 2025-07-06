@@ -15,20 +15,20 @@ export default function ShopPage() {
   return (
     <main className="flex min-h-screen flex-col">
       <Header />
-      <ShopBanner />
-      
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/4">
-            <FilterSidebar />
-          </div>
-          <div className="md:w-3/4">
-            <Suspense fallback={<LoadingScreen />}>
+      <Suspense fallback={<LoadingScreen />}>
+        <ShopBanner />
+        
+        <div className="container mx-auto px-4 py-12">
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="md:w-1/4">
+              <FilterSidebar />
+            </div>
+            <div className="md:w-3/4">
               <ProductGrid />
-            </Suspense>
+            </div>
           </div>
         </div>
-      </div>
+      </Suspense>
       
       <Footer />
     </main>

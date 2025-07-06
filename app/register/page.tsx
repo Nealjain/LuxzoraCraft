@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -8,7 +8,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { motion } from 'framer-motion'
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const searchParams = useSearchParams()
@@ -292,5 +292,17 @@ export default function RegisterPage() {
       
       <Footer />
     </main>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-primary flex items-center justify-center">
+        <div className="text-accent">Loading...</div>
+      </div>
+    }>
+      <RegisterContent />
+    </Suspense>
   )
 }

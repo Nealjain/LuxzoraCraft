@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -9,7 +9,7 @@ import Footer from '@/components/layout/Footer'
 import AddressCollection from '@/components/auth/AddressCollection'
 import { motion } from 'framer-motion'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const searchParams = useSearchParams()
@@ -159,5 +159,17 @@ export default function LoginPage() {
         onSubmit={handleAddressSubmit}
       />
     </main>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-primary flex items-center justify-center">
+        <div className="text-accent">Loading...</div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }

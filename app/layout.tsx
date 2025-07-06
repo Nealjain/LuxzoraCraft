@@ -16,6 +16,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://luxzoracraft.vercel.app'),
   title: 'LuxZoraCraft - Premium Jewelry Collection',
   description: 'Discover affordable luxury jewelry with LuxZoraCraft. Elegant designs, premium quality, and exceptional craftsmanship.',
   keywords: 'luxury jewelry, affordable jewelry, gold plated, necklaces, rings, earrings, bracelets, India',
