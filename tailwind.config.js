@@ -10,6 +10,7 @@ module.exports = {
     extend: {
       colors: {
         primary: '#0F0F0F', // Deep black
+        'primary-light': '#1A1A1A', // Slightly lighter black
         secondary: '#FFFFFF', // White
         accent: '#C8A97E', // Refined champagne gold
         'accent-light': '#D8BF9A', // Lighter champagne for hover states

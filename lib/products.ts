@@ -31,7 +31,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     images: data.images || [], // Ensure images is an array, default to empty if null/undefined
     category: data.category,
     stock: data.stock,
-    featured: data.featured,
+    featured: data.is_featured,
     spline_model: data.spline_model || null,
   };
 }
@@ -42,7 +42,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .eq('featured', true);
+    .eq('is_featured', true);
 
   if (error) {
     console.error('Error fetching featured products:', error);
@@ -58,7 +58,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
     images: item.images || [],
     category: item.category,
     stock: item.stock,
-    featured: item.featured,
+    featured: item.is_featured,
     spline_model: item.spline_model || null,
   }));
 }
