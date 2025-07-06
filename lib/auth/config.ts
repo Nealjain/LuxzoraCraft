@@ -33,8 +33,7 @@ export const authOptions = {
           name: profile.name,
           email: profile.email,
           image: profile.picture,
-          provider: 'google',
-          providerId: profile.sub,
+          isAdmin: false, // Default to false for new Google users
         }
       },
     }),
@@ -86,12 +85,18 @@ export const authOptions = {
       // Handle Google OAuth sign-in
       if (account?.provider === 'google') {
         try {
+          // Validate required user data
+          if (!user.email) {
+            console.error('Google OAuth: No email provided')
+            return false
+          }
+
           const supabase = await createClient()
           
           // Check if user already exists
           const { data: existingUser, error: fetchError } = await supabase
             .from('users')
-            .select('id, email, name, is_admin')
+            .select('id, email, name, is_admin, avatar_url, provider, provider_id')
             .eq('email', user.email)
             .single()
           
@@ -112,7 +117,7 @@ export const authOptions = {
                 avatar_url: user.image,
                 email_verified: true,
               })
-              .select('id, email, name, is_admin')
+              .select('id, email, name, is_admin, avatar_url, provider, provider_id')
               .single()
             
             if (insertError) {
@@ -168,9 +173,11 @@ export const authOptions = {
   },
   pages: {
     signIn: '/login',
+    error: '/auth/error', // Custom error page
   },
   session: {
     strategy: 'jwt' as const,
   },
+  debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
 }
