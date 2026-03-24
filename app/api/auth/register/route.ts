@@ -114,7 +114,7 @@ export async function POST(request: Request) {
           date_of_birth: dob || null,
           provider: 'credentials',
           email_verified: false,
-          is_admin: false,
+          role: 'customer',
         },
       ])
     

@@ -8,23 +8,22 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.isAdmin) {
-      return NextResponse.json(
-        { message: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    
+
     const supabase = await createClient()
-    
-    // Fetch orders with user information and addresses
+
     const { data: orders, error } = await supabase
       .from('orders')
       .select(`
         id,
-        amount,
+        order_number,
+        email,
         status,
+        payment_status,
+        total_amount,
         created_at,
         updated_at,
         users!orders_user_id_fkey (
@@ -33,9 +32,8 @@ export async function GET() {
           email
         ),
         addresses!orders_shipping_address_id_fkey (
-          street_address,
-          room_number,
-          building_name,
+          address_line_1,
+          address_line_2,
           city,
           state,
           postal_code,
@@ -43,41 +41,36 @@ export async function GET() {
         )
       `)
       .order('created_at', { ascending: false })
-    
+
     if (error) {
       console.error('Error fetching orders:', error)
-      return NextResponse.json(
-        { message: 'Failed to fetch orders' },
-        { status: 500 }
-      )
+      return NextResponse.json({ message: 'Failed to fetch orders' }, { status: 500 })
     }
-    
-    // Transform the data to match the expected format
-    const transformedOrders = orders?.map((order: any) => ({
+
+    const transformed = orders?.map((order: any) => ({
       id: order.id,
+      order_number: order.order_number,
+      email: order.email,
       customer: {
-        name: order.users?.name || 'Unknown Customer',
-        email: order.users?.email || 'No email'
+        name: order.users?.name || 'Unknown',
+        email: order.users?.email || order.email,
       },
       status: order.status,
-      amount: parseFloat(order.amount.toString()),
+      payment_status: order.payment_status,
+      total_amount: parseFloat(order.total_amount),
       created_at: order.created_at,
-      items: [], // Will be populated separately if needed
-      shipping_address: {
-        street_address: order.addresses?.street_address || '',
-        city: order.addresses?.city || '',
-        state: order.addresses?.state || '',
-        postal_code: order.addresses?.postal_code || '',
-        country: order.addresses?.country || ''
-      }
+      shipping_address: order.addresses ? {
+        address_line_1: order.addresses.address_line_1,
+        city: order.addresses.city,
+        state: order.addresses.state,
+        postal_code: order.addresses.postal_code,
+        country: order.addresses.country,
+      } : null,
     })) || []
-    
-    return NextResponse.json({ orders: transformedOrders })
+
+    return NextResponse.json({ orders: transformed })
   } catch (error) {
     console.error('Error in admin orders API:', error)
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
   }
 }
